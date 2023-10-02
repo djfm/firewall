@@ -17,6 +17,7 @@
     "eslint-config-xo-typescript": "latest",
     "eslint-plugin-react": "latest",
     "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {

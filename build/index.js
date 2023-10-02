@@ -1,7 +1,8 @@
 "use strict";
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createDefaultMiddleware = void 0;
-const log = console.log;
+const { log } = console;
 const field = (key, value) => {
     if (typeof value === 'string') {
         return {
@@ -38,16 +39,16 @@ const row = (value = []) => {
         if (!key) {
             return res;
         }
-        const field = value.find((f) => f.key === key);
+        const field = value.find(f => f.key === key);
         if (!field) {
             return undefined;
         }
         return field.value;
     };
     const set = (key, newValue) => {
-        const existingField = value.find((f) => f.key === key);
+        const existingField = value.find(f => f.key === key);
         if (existingField) {
-            return row(value.map((f) => {
+            return row(value.map(f => {
                 if (f.key === key) {
                     return field(key, newValue);
                 }
@@ -67,6 +68,7 @@ const row = (value = []) => {
 const nLimit = 200;
 const requests = [];
 const updateStatistics = (newData, oldData) => {
+    console.log('dummy update of firewall');
 };
 const addRequest = (request) => {
     log('addRequest', request);
@@ -87,7 +89,7 @@ const createDefaultMiddleware = () => {
             .set('path', req.path)
             .set('user-agent', (_a = req.headers['user-agent']) !== null && _a !== void 0 ? _a : '')
             .set('ip', req.ip)
-            .set('referer', (_b = req.headers['referer']) !== null && _b !== void 0 ? _b : '');
+            .set('referer', (_b = req.headers.referer) !== null && _b !== void 0 ? _b : '');
         res.on('close', () => {
             var _a;
             const finalReqModel = reqModel
