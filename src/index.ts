@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+
 import type {
-	Request as ExpressRequest,
-	Response as ExpressResponse,
-	NextFunction as ExpressNextFunction,
+	RequestHandler as ExpressRequestHandler,
 } from 'express';
 
-const log = console.log;
+const {log} = console;
 
 export type Request<K extends string | number | symbol, V> = {
 	features: {
@@ -72,7 +72,7 @@ const field = (key: string, value: string | number | Value): FieldValue => {
 		key,
 		value,
 	};
-}
+};
 
 const row = (value: FieldValue[] = []) => {
 	const res: RowValue = {
@@ -85,7 +85,7 @@ const row = (value: FieldValue[] = []) => {
 			return res;
 		}
 
-		const field = value.find((f) => f.key === key);
+		const field = value.find(f => f.key === key);
 
 		if (!field) {
 			return undefined;
@@ -95,42 +95,43 @@ const row = (value: FieldValue[] = []) => {
 	};
 
 	const set = (key: string, newValue: string | number | Value) => {
-		const existingField = value.find((f) => f.key === key);
+		const existingField = value.find(f => f.key === key);
 
 		if (existingField) {
-			return row(value.map((f) => {
-					if (f.key === key) {
-						return field(key, newValue);
-					}
+			return row(value.map(f => {
+				if (f.key === key) {
+					return field(key, newValue);
+				}
 
-					return f;
-				}),
+				return f;
+			}),
 			);
 		}
 
 		return row([
-				...value,
-				field(key, newValue),
-			],
-		);
+			...value,
+			field(key, newValue),
+		]);
 	};
 
 	return {
 		get,
 		set,
-	}
+	};
 };
 
 export type Value = StringValue | NumberValue | FieldValue | ArrayValue | RowValue;
 
-export type Middleware = (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => void;
+export type PathLike = string;
+
+export type Middleware = ExpressRequestHandler;
 
 const nLimit = 200;
 const requests: RowValue[] = [];
 
 const updateStatistics = (newData: RowValue, oldData: RowValue) => {
-
-}
+	console.log('dummy update of firewall');
+};
 
 const addRequest = (request: RowValue) => {
 	log('addRequest', request);
@@ -144,9 +145,9 @@ const addRequest = (request: RowValue) => {
 			updateStatistics(request, first);
 		}
 	}
-}
+};
 
-export const createDefaultMiddleware = (): Middleware => {
+export const createDefaultMiddleware = (): ExpressRequestHandler => {
 	const t = Date.now();
 
 	return (req, res, next) => {
@@ -155,18 +156,20 @@ export const createDefaultMiddleware = (): Middleware => {
 			.set('path', req.path)
 			.set('user-agent', req.headers['user-agent'] ?? '')
 			.set('ip', req.ip)
-			.set('referer', req.headers['referer'] ?? '')
+			.set('referer', req.headers.referer ?? '');
 
 		res.on('close', () => {
 			const finalReqModel = reqModel
 				.set('status', res.statusCode)
 				.set('duration', Date.now() - t)
-				.set('status-message', res.statusMessage ?? '')
+				.set('status-message', res.statusMessage ?? '');
 
 			addRequest(finalReqModel.get() as RowValue);
-		})
+		});
 
 		console.log('Default middleware here!');
 		next();
 	};
-}
+};
+
+export default createDefaultMiddleware;
